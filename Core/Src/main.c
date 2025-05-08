@@ -32,7 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+volatile char TXBuffer[1024];
+volatile char RXBuffer[1024];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
