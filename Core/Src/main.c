@@ -33,17 +33,20 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-volatile char TXBuffer[1024];
-volatile char RXBuffer[1024];
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+volatile char TXBuffer[1024];
+volatile char RXBuffer[1024];
 
+volatile states_t Stat = {0,0,0,0};
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 
 /* USER CODE BEGIN PV */
 ads1115_t ads1;
@@ -53,9 +56,10 @@ ads1115_t ads1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 static void ADS_INIT(ads1115_t* ads);
-void print(char* msg);
+static void OLED_INIT(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -94,15 +98,26 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USB_DEVICE_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-
+  OLED_INIT();
   ADS_INIT(&ads1);
+  HAL_NVIC_EnableIRQ(ADC_ALRT_EXTI_IRQn);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+      char msg[12];
+      snprintf(msg, 12, "%f", Stat.Vpkpk);
+      ssd1306_FillRectangle(0,20,128,32, Black);
+      ssd1306_SetCursor(0,20);
+      ssd1306_WriteString(msg,Font_7x10,White);
+      ssd1306_UpdateScreen();
+      Stat.max = 0;
+      Stat.min = 0;
+      HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -190,6 +205,40 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 400000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -233,7 +282,6 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -244,7 +292,7 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->hi2c = &hi2c1;
     ads->I2C_Addr = 0x48;
     ads->OS = 0x0;
-    ads->MUX = CONFIG_MUX_COMM_0;
+    ads->MUX = CONFIG_MUX_DIFF_01;
     ads->PGA = CONFIG_PGA_FSR_6;
     ads->MODE = CONFIG_MODE_CONT;
     ads->DR = CONFIG_DR_860;
@@ -259,6 +307,17 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->scale = 0.1875;
 
     ADS1115_init(ads);
+}
+
+static void OLED_INIT(void){
+    ssd1306_Init();
+    ssd1306_SetDisplayOn(1);
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0,0);
+    ssd1306_WriteString("V     [mV]", Font_16x15, White);
+    ssd1306_SetCursor(10,10);
+    ssd1306_WriteString("pk-pk", Font_6x8, White);
+    ssd1306_UpdateScreen();
 }
 
 void print(char* msg){

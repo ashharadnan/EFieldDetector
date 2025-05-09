@@ -58,6 +58,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -217,10 +218,10 @@ void EXTI0_IRQHandler(void)
   char msg[32];
   HAL_StatusTypeDef ret = ADS1115_read(&ads1);
     if (ret == HAL_OK){
-        snprintf(msg, 32, "OK: %f mV\n", ads1.captured);
+        snprintf(msg, 32, "OK! %f\n", Stat.last);
     }
     else{
-        snprintf(msg, 32,"NOT OK! %x\n", ret);
+        snprintf(msg, 32,"ERR! 0x%x\n", ret);
     }
     print(msg);
   /* USER CODE END EXTI0_IRQn 1 */
@@ -232,19 +233,30 @@ void EXTI0_IRQHandler(void)
 void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(ADC_ALRT_Pin);
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
-    char msg[48];
     HAL_StatusTypeDef ret = ADS1115_read(&ads1);
-    uint32_t tick = HAL_GetTick();
-    if (ret == HAL_OK){
-        snprintf(msg, 48, "Triggered: %f mV\t %lu ms\n", ads1.captured, tick);
+    if (ret != HAL_OK){
+        char msg[32];
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+        snprintf(msg, 32,"ADC ERR! 0x%x\n", ret);
+        print(msg);
     }
     else{
-        snprintf(msg, 48,"COMM ERR! %x\n", ret);
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+        float cap = ads1.captured;
+        Stat.last = cap;
+        if (cap > Stat.max){
+            Stat.max = cap;
+            Stat.Vpkpk = cap - Stat.min;
+        }
+        else if (cap < Stat.min) {
+            Stat.min = cap;
+            Stat.Vpkpk = -cap + Stat.max;
+        }
     }
-    print(msg);
   /* USER CODE END EXTI9_5_IRQn 1 */
 }
 
@@ -260,6 +272,20 @@ void I2C1_ER_IRQHandler(void)
   /* USER CODE BEGIN I2C1_ER_IRQn 1 */
 
   /* USER CODE END I2C1_ER_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C2 error interrupt.
+  */
+void I2C2_ER_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C2_ER_IRQn 0 */
+
+  /* USER CODE END I2C2_ER_IRQn 0 */
+  HAL_I2C_ER_IRQHandler(&hi2c2);
+  /* USER CODE BEGIN I2C2_ER_IRQn 1 */
+
+  /* USER CODE END I2C2_ER_IRQn 1 */
 }
 
 /**

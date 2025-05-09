@@ -33,11 +33,18 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include "ADS1115.h"
+#include "ssd1306.h"
+#include "ssd1306_fonts.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+typedef struct {
+    float max;
+    float min;
+    float last;
+    float Vpkpk;
+}states_t;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -49,6 +56,8 @@ extern ads1115_t ads1;
 /* USER CODE BEGIN EM */
 extern volatile char TXBuffer[1024];
 extern volatile char RXBuffer[1024];
+
+extern volatile states_t Stat;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -67,10 +76,6 @@ extern void print(char* msg);
 #define ADC_ALRT_Pin GPIO_PIN_5
 #define ADC_ALRT_GPIO_Port GPIOB
 #define ADC_ALRT_EXTI_IRQn EXTI9_5_IRQn
-#define ADC_SCL_Pin GPIO_PIN_6
-#define ADC_SCL_GPIO_Port GPIOB
-#define ADC_SDA_Pin GPIO_PIN_7
-#define ADC_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
