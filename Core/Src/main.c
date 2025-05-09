@@ -293,7 +293,7 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->I2C_Addr = 0x48;
     ads->OS = 0x0;
     ads->MUX = CONFIG_MUX_DIFF_01;
-    ads->PGA = CONFIG_PGA_FSR_6;
+    ads->PGA = CONFIG_PGA_FSR_1;
     ads->MODE = CONFIG_MODE_CONT;
     ads->DR = CONFIG_DR_860;
     ads->COMP_MODE = CONFIG_COMP_MODE_WINDOW;
@@ -304,7 +304,7 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->Hi_Thres[1] = 0x00;
     ads->Lo_Thres[0] = 0x00;
     ads->Lo_Thres[1] = 0x00;
-    ads->scale = 0.1875;
+    ads->scale = 0.03125;
 
     ADS1115_init(ads);
 }
