@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include "ADS1115.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -41,7 +42,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+extern ads1115_t ads1;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -54,7 +55,7 @@ extern volatile char RXBuffer[1024];
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern void print(char* msg);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

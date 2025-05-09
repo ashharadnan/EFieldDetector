@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "ADS1115.h"
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +46,7 @@ volatile char RXBuffer[1024];
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
-
+ads1115_t ads1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -53,7 +54,8 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void ADS_INIT(ads1115_t* ads);
+void print(char* msg);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -94,6 +96,7 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 
+  ADS_INIT(&ads1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -170,7 +173,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 144;
+  hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;
@@ -204,7 +207,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -221,15 +224,15 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ADC_ALRT_Pin */
   GPIO_InitStruct.Pin = ADC_ALRT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ADC_ALRT_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
@@ -237,7 +240,31 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void ADS_INIT(ads1115_t* ads) {
+    ads->hi2c = &hi2c1;
+    ads->I2C_Addr = 0x48;
+    ads->OS = 0x0;
+    ads->MUX = CONFIG_MUX_COMM_0;
+    ads->PGA = CONFIG_PGA_FSR_6;
+    ads->MODE = CONFIG_MODE_CONT;
+    ads->DR = CONFIG_DR_860;
+    ads->COMP_MODE = CONFIG_COMP_MODE_WINDOW;
+    ads->COMP_POL = CONFIG_COMP_POL_ALOW;
+    ads->COMP_LAT = CONFIG_COMP_LAT_OFF;
+    ads->COMP_QUE = CONFIG_COMP_QUE_1;
+    ads->Hi_Thres[0] = 0x80;
+    ads->Hi_Thres[1] = 0x00;
+    ads->Lo_Thres[0] = 0x00;
+    ads->Lo_Thres[1] = 0x00;
+    ads->scale = 0.1875;
 
+    ADS1115_init(ads);
+}
+
+void print(char* msg){
+    strncpy(TXBuffer, msg, 1024);
+    CDC_Transmit_FS(TXBuffer, strlen(TXBuffer));
+}
 /* USER CODE END 4 */
 
 /**

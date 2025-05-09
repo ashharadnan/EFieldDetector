@@ -57,6 +57,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -90,6 +91,7 @@ void HardFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -105,6 +107,7 @@ void MemManage_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+
     /* USER CODE END W1_MemoryManagement_IRQn 0 */
   }
 }
@@ -120,6 +123,7 @@ void BusFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+
     /* USER CODE END W1_BusFault_IRQn 0 */
   }
 }
@@ -135,6 +139,7 @@ void UsageFault_Handler(void)
   while (1)
   {
     /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+
     /* USER CODE END W1_UsageFault_IRQn 0 */
   }
 }
@@ -188,9 +193,7 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-  uint32_t tick = HAL_GetTick();
-  sniprintf(TXBuffer, 1024, "%lu ms\n", tick);
-  CDC_Transmit_FS(TXBuffer, strlen(TXBuffer));
+
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -211,7 +214,15 @@ void EXTI0_IRQHandler(void)
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(KEY_Pin);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
-
+  char msg[32];
+  HAL_StatusTypeDef ret = ADS1115_read(&ads1);
+    if (ret == HAL_OK){
+        snprintf(msg, 32, "OK: %f mV\n", ads1.captured);
+    }
+    else{
+        snprintf(msg, 32,"NOT OK! %x\n", ret);
+    }
+    print(msg);
   /* USER CODE END EXTI0_IRQn 1 */
 }
 
@@ -221,12 +232,34 @@ void EXTI0_IRQHandler(void)
 void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
-
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(ADC_ALRT_Pin);
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
-
+    char msg[48];
+    HAL_StatusTypeDef ret = ADS1115_read(&ads1);
+    uint32_t tick = HAL_GetTick();
+    if (ret == HAL_OK){
+        snprintf(msg, 48, "Triggered: %f mV\t %lu ms\n", ads1.captured, tick);
+    }
+    else{
+        snprintf(msg, 48,"COMM ERR! %x\n", ret);
+    }
+    print(msg);
   /* USER CODE END EXTI9_5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles I2C1 error interrupt.
+  */
+void I2C1_ER_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_ER_IRQn 0 */
+
+  /* USER CODE END I2C1_ER_IRQn 0 */
+  HAL_I2C_ER_IRQHandler(&hi2c1);
+  /* USER CODE BEGIN I2C1_ER_IRQn 1 */
+
+  /* USER CODE END I2C1_ER_IRQn 1 */
 }
 
 /**
