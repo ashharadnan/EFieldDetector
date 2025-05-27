@@ -256,6 +256,8 @@ void EXTI9_5_IRQHandler(void)
             Stat.min = cap;
             Stat.Vpkpk = -cap + Stat.max;
         }
+      Pack->sample = cap;
+      CDC_Transmit_FS((uint8_t*)Pack, sizeof(Packet));
     }
   /* USER CODE END EXTI9_5_IRQn 1 */
 }

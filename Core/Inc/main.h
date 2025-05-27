@@ -45,6 +45,11 @@ typedef struct {
     float last;
     float Vpkpk;
 }states_t;
+
+typedef struct packet_t{
+    float sample;
+    char _LOWPAD[4];
+}packet_t;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -58,6 +63,8 @@ extern volatile char TXBuffer[1024];
 extern volatile char RXBuffer[1024];
 
 extern volatile states_t Stat;
+extern volatile packet_t Packet;
+extern volatile packet_t* Pack;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

@@ -42,6 +42,8 @@ volatile char TXBuffer[1024];
 volatile char RXBuffer[1024];
 
 volatile states_t Stat = {0,0,0,0};
+volatile packet_t Packet = {0,"XXX\n"};
+volatile packet_t* Pack = &Packet;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -117,6 +119,7 @@ int main(void)
       ssd1306_UpdateScreen();
       Stat.max = 0;
       Stat.min = 0;
+    print(msg);
       HAL_Delay(100);
     /* USER CODE END WHILE */
 
@@ -293,7 +296,7 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->I2C_Addr = 0x48;
     ads->OS = 0x0;
     ads->MUX = CONFIG_MUX_DIFF_01;
-    ads->PGA = CONFIG_PGA_FSR_1;
+    ads->PGA = CONFIG_PGA_FSR_4;
     ads->MODE = CONFIG_MODE_CONT;
     ads->DR = CONFIG_DR_860;
     ads->COMP_MODE = CONFIG_COMP_MODE_WINDOW;
@@ -304,9 +307,9 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->Hi_Thres[1] = 0x00;
     ads->Lo_Thres[0] = 0x00;
     ads->Lo_Thres[1] = 0x00;
-    ads->scale = 0.03125;
+    ads->scale = 0.125;
 
-    ADS1115_init(ads);
+    if (ADS1115_init(ads) != HAL_OK){print("HAL ERROR\n");};
 }
 
 static void OLED_INIT(void){
