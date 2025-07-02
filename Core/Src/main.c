@@ -41,7 +41,7 @@
 volatile char TXBuffer[1024];
 volatile char RXBuffer[1024];
 
-volatile states_t Stat = {0,0,0,0};
+volatile states_t Stat = {-20000,20000,0,0};
 volatile packet_t Packet = {0,"XXX\n"};
 volatile packet_t* Pack = &Packet;
 /* USER CODE END PM */
@@ -120,6 +120,8 @@ int main(void)
       Stat.max = 0;
       Stat.min = 0;
     print(msg);
+    Stat.max = -20000;
+    Stat.min = 20000;
       HAL_Delay(100);
     /* USER CODE END WHILE */
 
@@ -281,10 +283,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(ADC_ALRT_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 3, 0);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
