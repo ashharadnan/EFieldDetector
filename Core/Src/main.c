@@ -295,7 +295,7 @@ static void ADS_INIT(ads1115_t* ads) {
     ads->hi2c = &hi2c1;
     ads->I2C_Addr = 0x48;
     ads->OS = 0x0;
-    ads->MUX = CONFIG_MUX_DIFF_01;
+    ads->MUX = CONFIG_MUX_COMM_0;
     ads->PGA = CONFIG_PGA_FSR_4;
     ads->MODE = CONFIG_MODE_CONT;
     ads->DR = CONFIG_DR_860;
